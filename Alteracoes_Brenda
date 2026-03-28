@@ -1,0 +1,10 @@
+oie, anotações da brenda
+
+
+pode add na função breadthFirstSearch....
+
+abaixo de visited = set([start])  
+
+o comentário:
+
+    #set é uma estrutura de dados que armazena elementos únicos, ou seja, não permite duplicatas.
