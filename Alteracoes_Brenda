@@ -13,6 +13,92 @@ o comentário:
 Q5) para a questão 5 no arquivo searchAgents....
 
 
+class CornersProblem(search.SearchProblem):
+    """
+    This search problem finds paths through all four corners of a layout.
+
+    You must select a suitable state space and successor function
+    
+     estado = ( posicao_atual , informacao_sobre_cantos_visitados )
+    """
+
+    def __init__(self, startingGameState):
+        """
+        Stores the walls, pacman's starting position and corners.
+        """
+        self.walls = startingGameState.getWalls()
+        self.startingPosition = startingGameState.getPacmanPosition()
+        top, right = self.walls.height-2, self.walls.width-2
+        self.corners = ((1,1), (1,top), (right, 1), (right, top))
+        for corner in self.corners:
+            if not startingGameState.hasFood(*corner):
+                print('Warning: no food in corner ' + str(corner))
+        self._expanded = 0 # DO NOT CHANGE; Number of search nodes expanded
+        
+       # estado inicial dos cantos visitados
+        visitedCorners = [False, False, False, False]
+        for i, corner in enumerate(self.corners):  #enumerate para obter o índice e o canto correspondente
+            if self.startingPosition == corner:
+                visitedCorners[i] = True
+        self.startVisitedCorners = tuple(visitedCorners)
+        # cast tuple pois estados precisam ser imutáveis, comparaveis e seguros para usar como chaves em dicionários
+        # pois devem ser independentes entre si 
+        
+    def getStartState(self):
+        """
+        Returns the start state (in your state space, not the full Pacman state
+        space)
+        """
+        return (self.startingPosition, self.startVisitedCorners)
+    # tupla = estado = (posicao_atual, {bool(cantos_visitados)})
+
+    def isGoalState(self, state):
+        """
+        Returns whether this search state is a goal state of the problem.
+        """
+        position, visitedCorners = state
+        return all(visitedCorners)
+    # retorna verdadeiro se todos os cantos foram visitados 
+    # (TODOS os valores em visitedCorners = True)
+
+    def getSuccessors(self, state):
+        """
+        Returns successor states, the actions they require, and a cost of 1.
+
+         As noted in search.py:
+            For a given state, this should return a list of triples, (successor,
+            action, stepCost), where 'successor' is a successor to the current
+            state, 'action' is the action required to get there, and 'stepCost'
+            is the incremental cost of expanding to that successor
+        """
+        successors = []
+        currentPosition, visitedCorners = state
+
+        for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
+        # tenta mover para a direção dada por 'action' e calcula a nova posição 
+        # aqui é logica do jogo para calcular a nova posição com base na ação e verificar se é válida (sem paredes)   
+            x, y = currentPosition
+            dx, dy = Actions.directionToVector(action) 
+            nextx, nexty = int(x + dx), int(y + dy)
+
+            if not self.walls[nextx][nexty]:
+                nextPosition = (nextx, nexty)
+
+                # copia o estado dos cantos visitados para criar um novo estado independente
+                nextVisitedCorners = list(visitedCorners)
+
+                # se a nova posição for um canto, marca como visitado
+                for i, corner in enumerate(self.corners):
+                    if nextPosition == corner:
+                        nextVisitedCorners[i] = True
+
+                nextState = (nextPosition, tuple(nextVisitedCorners))
+                successors.append((nextState, action, 1))
+
+        self._expanded += 1 # custo unitario para cada ação - do not change
+        return successors
+
+
 Q8)  para a questao 8 no arquivo searchAgents:
 
 
